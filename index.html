@@ -1,37 +1,35 @@
 <!DOCTYPE html>
+<html lang="ja-JP">
 <header>
+  <meta charset="utf-8">
   <title>Rich Text To Markdown</title>
-  <meta lang="ja-JP">
-  <meta charset="utf8">
-  <script src="https://unpkg.com/turndown/dist/turndown.js"></script>
+  <script src="turndown.js"></script>
 </header>
+
 <body>
-  <span>下に書式情報を持ったテキストを貼り付け</span>
-  <div id="paste-area" contenteditable="true"></div>
+  <span>下に書式情報を持ったテキストを貼り付け</span><br>
+  <div>
+    <button id="clearButton">クリア</button>
+  </div>
+  <div id="paste-area" contenteditable="true" style="border: dashed"></div>
+  
   <hr />
+
   <span>結果:</span><br>
   <textarea id="result" style="width: 90vw; height: 60vh;"></textarea>
 </body>
+
 <script lang="javascript">
   const turndownService = new TurndownService({
     headingStyle: 'atx',
     hr: '---',
     codeBlockStyle: 'fenced',
-    bulletListMarker: '-',
-    blankReplacement: (content, node) => {
-      return '';
-    },
-    keepReplacement: (content, node) => {
-      return node.outerHTML;
-    },
-    defaultReplacement: (content, node) => {
-      return content;
-    }
+    bulletListMarker: '-'
   });
   const pasteAreaDiv = document.getElementById('paste-area');
   const resultText = document.getElementById('result');
 
-  function handlePaste() {
+  function convertToMarkdown() {
     // https://github.com/mixmark-io/turndown/issues/272#issuecomment-1348836963
     pasteAreaDiv.querySelectorAll("li + ol, li + ul").forEach((ul) => {
       // Insert ul inside the previous li
@@ -42,14 +40,18 @@
     const md = turndownService.turndown(pasteAreaDiv.innerHTML);
     console.log(`MD: ${md}`);
     resultText.textContent = md;
+    resultText.select();
+  }
 
-    return true;
+  function clearInput() {
+    pasteAreaDiv.innerHTML = '';
+    resultText.textContent = '';
   }
 
   (() => {
-    // pasteイベントが起こったフレームではDOMが更新されてないので少し遅らせる
-    // pasteAreaDiv.onpaste = (e) => setTimeout(() => handlePaste(), 10);
-    pasteAreaDiv.addEventListener('input', () => handlePaste());
+    pasteAreaDiv.addEventListener('input', () => convertToMarkdown());
+    document.getElementById('clearButton').addEventListener('click', () => clearInput());
     console.log('registered events!');
   })();
 </script>
+</html>
