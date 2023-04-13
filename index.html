@@ -8,8 +8,12 @@
 
 <body>
   <span>下に書式情報を持ったテキストを貼り付け</span><br>
-  <div>
+  <div style="margin: 0.5em;">
     <button id="clearButton">クリア</button>
+    <span>
+      <input type="checkbox" id="isAutoCopy" checked>
+      <label for="isAutoCopy">結果を自動でコピー</label>
+    </span>
   </div>
   <div id="paste-area" contenteditable="true" style="border: dashed"></div>
   
@@ -28,6 +32,7 @@
   });
   const pasteAreaDiv = document.getElementById('paste-area');
   const resultText = document.getElementById('result');
+  const isAutoCopy = document.getElementById('isAutoCopy');
 
   function convertToMarkdown() {
     // https://github.com/mixmark-io/turndown/issues/272#issuecomment-1348836963
@@ -41,11 +46,18 @@
     console.log(`MD: ${md}`);
     resultText.textContent = md;
     resultText.select();
+    if (isAutoCopy.checked){
+      copyToClipboard();
+    }
   }
 
   function clearInput() {
     pasteAreaDiv.innerHTML = '';
     resultText.textContent = '';
+  }
+
+  function copyToClipboard(){
+    document.execCommand('copy');
   }
 
   (() => {
