@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<header>
+  <title>Rich Text To Markdown</title>
+  <meta lang="ja-JP">
+  <meta charset="utf8">
+  <script src="https://unpkg.com/turndown/dist/turndown.js"></script>
+</header>
+<body>
+  <span>下に書式情報を持ったテキストを貼り付け</span>
+  <div id="paste-area" contenteditable="true"></div>
+  <hr />
+  <span>結果:</span><br>
+  <textarea id="result" style="width: 90vw; height: 60vh;"></textarea>
+</body>
+<script lang="javascript">
+  const turndownService = new TurndownService({
+    headingStyle: 'atx',
+    hr: '---',
+    codeBlockStyle: 'fenced',
+    bulletListMarker: '-',
+    blankReplacement: (content, node) => {
+      return '';
+    },
+    keepReplacement: (content, node) => {
+      return node.outerHTML;
+    },
+    defaultReplacement: (content, node) => {
+      return content;
+    }
+  });
+  const pasteAreaDiv = document.getElementById('paste-area');
+  const resultText = document.getElementById('result');
+
+  function handlePaste() {
+    // https://github.com/mixmark-io/turndown/issues/272#issuecomment-1348836963
+    pasteAreaDiv.querySelectorAll("li + ol, li + ul").forEach((ul) => {
+      // Insert ul inside the previous li
+      const li = ul.previousElementSibling;
+      li.appendChild(ul);
+    });
+
+    const md = turndownService.turndown(pasteAreaDiv.innerHTML);
+    console.log(`MD: ${md}`);
+    resultText.textContent = md;
+
+    return true;
+  }
+
+  (() => {
+    // pasteイベントが起こったフレームではDOMが更新されてないので少し遅らせる
+    // pasteAreaDiv.onpaste = (e) => setTimeout(() => handlePaste(), 10);
+    pasteAreaDiv.addEventListener('input', () => handlePaste());
+    console.log('registered events!');
+  })();
+</script>
